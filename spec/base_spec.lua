@@ -1,0 +1,18 @@
+local KV = require('kv')
+describe("Should set and get simple strings", function()
+    it("should set and get", function()
+        KV.set("@x:Name", "BobbaBouey")
+        local result = KV.get("@x:Name")
+        assert.are.same(result, "BobbaBouey")
+    end)
+end)
+
+describe("Should set and get by prefix", function()
+    it("should set multiple and get by prefix key", function()
+        KV.set("@x:Fruit:1:", "apple")
+        KV.set("@x:Fruit:2", "peach")
+        local results = KV.getPrefix("@x:Fruit")
+        assert.are.same(KV.len(results), 2)
+    end)
+end)
+
