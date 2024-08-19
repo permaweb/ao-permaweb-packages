@@ -1,4 +1,3 @@
-local json = require('json')
 local KV = {}
 
 if not KV.store then
@@ -8,7 +7,6 @@ if not KV.store then
 end
 
 function KV.set (keyString, value)
-    print('set')
     KV.store[keyString] = value
 end
 
@@ -36,6 +34,14 @@ end
 
 local function starts_with(str, prefix)
     return str:sub(1, #prefix) == prefix
+end
+
+function KV.keys(store)
+    local results = {}
+    for k, _ in pairs(store) do
+        table.insert(results, k)
+    end
+    return results
 end
 
 function KV.getPrefix(prefix)
