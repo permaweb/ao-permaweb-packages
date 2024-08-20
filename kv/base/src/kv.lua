@@ -1,6 +1,15 @@
 local KV = {}
 KV.__index = KV
 
+local Batch = {}
+Batch.__index = Batch
+
+function Batch.new()
+    local self = setmetatable({}, Batch)
+    self.operations = {}
+    return self
+end
+
 function KV.new(label)
     local self = setmetatable({}, KV)
     self.label = label
@@ -54,6 +63,50 @@ function KV:getPrefix(prefix)
     return filter_store(self.store, function(k, _)
         return starts_with(k, prefix)
     end)
+end
+
+function KV:write(batch)
+    batch:execute(self)
+    batch:destroy()
+end
+
+function KV:start_batch()
+    return Batch.new()
+end
+
+function Batch:set(keyString, value)
+    table.insert(self.operations, { op = "set", key = keyString, value = value })
+end
+
+function Batch:delete(keyString)
+    table.insert(self.operations, { op = "delete", key = keyString })
+end
+
+function Batch:execute(kv)
+    for _, operation in ipairs(self.operations) do
+        if operation.op == "set" then
+            kv:set(operation.key, operation.value)
+        elseif operation.op == "delete" then
+            kv:del(operation.key)
+        end
+    end
+end
+
+function Batch:clear()
+    self.operations = {}
+end
+
+function Batch:destroy()
+    self:clear()
+    setmetatable(self, nil)
+end
+
+function Batch:print()
+    local result = "PRINTED: "
+    for _, operation in ipairs(self.operations) do
+        result = result .. operation.op
+    end
+    print(result)
 end
 
 return KV
