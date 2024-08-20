@@ -11,6 +11,7 @@ local function get_len(results)
     end
     return len
 end
+
 describe("Should set and get simple strings", function()
     it("should set and get", function()
         local aStore = KV.new("aStore")
@@ -22,7 +23,7 @@ describe("Should set and get simple strings", function()
     end)
 end)
 
-describe("Should set and get by prefix", function()
+describe("By prefix", function()
     it("should set multiple and get by prefix key", function()
         local bStore = KV.new("bStore")
         bStore:set("@x:Fruit:1:", "apple")
@@ -32,6 +33,35 @@ describe("Should set and get by prefix", function()
         assert.are.same(get_len(results), 2)
         local allResults = bStore:getPrefix("")
         assert.are.same(get_len(allResults), 3)
+    end)
+end)
+
+describe("Batch", function()
+    it("should create and write a batch", function()
+        local cStore = KV.new("cStore")
+        cStore:set("initialItem", "apple")
+        local initialItems = cStore:getPrefix("")
+        assert.are.same(get_len(initialItems), 1)
+
+        -- add two items
+        local batch = cStore:start_batch()
+        batch:set("item1", "dog")
+        batch:set("item2", "cat")
+        cStore:write(batch)
+        local batchedItems = cStore:getPrefix("item")
+        assert.are.same(get_len(batchedItems), 2)
+        assert.are.same(batchedItems["item1"], "dog")
+        assert.are.same(batchedItems["item2"], "cat")
+
+        -- move "cat" to item1, delete cat and initialItem,
+        local batch = cStore:start_batch()
+        batch:set("item1", "cat")
+        batch:delete("initialItem")
+        batch:delete("item2")
+        cStore:write(batch)
+        local batchedItems = cStore:getPrefix("item")
+        assert.are.same(get_len(batchedItems), 1)
+        assert.are.same(batchedItems["item1"], "cat")
     end)
 end)
 
