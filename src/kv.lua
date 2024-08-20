@@ -24,6 +24,10 @@ function KV:len()
     return count
 end
 
+function KV:del(keyString)
+    self.store[keyString] = nil
+end
+
 function KV:keys()
     local keys = {}
     for k, _ in pairs(self.store) do
