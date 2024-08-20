@@ -101,14 +101,6 @@ function Batch:destroy()
     setmetatable(self, nil)
 end
 
-function Batch:print()
-    local result = "PRINTED: "
-    for _, operation in ipairs(self.operations) do
-        result = result .. operation.op
-    end
-    print(result)
-end
-
 return KV
 
 
