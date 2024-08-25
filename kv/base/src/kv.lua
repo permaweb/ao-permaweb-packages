@@ -1,11 +1,22 @@
 local KV = {}
 KV.__index = KV
+KV.stores = {}
 
 function KV.new(label)
+    if type(label) ~= "string" then
+        print("error")
+        error("Invalid label")
+    end
+    if KV.stores[label] then
+        print("error")
+        error("Store " .. label .. "  already exists")
+    end
+    --print('LABEL' .. label)
     local self = setmetatable({}, KV)
     self.label = label
     self.store = {}
-    return self
+    KV.stores[label] = self
+    return true
 end
 
 function KV:get(keyString)
