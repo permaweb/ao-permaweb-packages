@@ -1,15 +1,6 @@
 local KV = {}
 KV.__index = KV
 
-local Batch = {}
-Batch.__index = Batch
-
-function Batch.new()
-    local self = setmetatable({}, Batch)
-    self.operations = {}
-    return self
-end
-
 function KV.new(label)
     local self = setmetatable({}, KV)
     self.label = label
@@ -63,11 +54,6 @@ function KV:getPrefix(prefix)
     return filter_store(self.store, function(k, _)
         return starts_with(k, prefix)
     end)
-end
-
-function KV:write(batch)
-    batch:execute(self)
-    batch:destroy()
 end
 
 return KV
