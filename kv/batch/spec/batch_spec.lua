@@ -1,4 +1,4 @@
-local KV = require('main')
+local KV = require('kv')
 local Batch = require('batch')
 local nameKey = "@x:Name"
 

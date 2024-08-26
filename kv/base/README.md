@@ -32,3 +32,9 @@
 `export PATH=$PATH:/home/jessop/.luarocks/bin`
 ## Testing
 `busted`
+
+# APM Publish
+
+1. Run build script
+    `./build/sh`
+2. Publish `main.lua` from `dist/`
