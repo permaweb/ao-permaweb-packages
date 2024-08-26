@@ -3,11 +3,11 @@
 1. Make sure you have APM
     `load-blueprint apm`
 2. Use APM to install
-   `APM.install("@ao-permaweb-packages/kv-base")`
+   `APM.install("@aopermawebpackages/kv-base")`
 
 # Usage
 1. Require
-    `local KV = require("@ao-permaweb-packages/kv-base")`
+    `local KV = require("@aopermawebpackages/kv-base")`
 2. Instantiate
     ```
     local storeName = "aStore"
