@@ -47,7 +47,7 @@ function KV:keys()
     return keys
 end
 
-local function filter_store(store, fn)
+function KV.filter_store(store, fn)
     local results = {}
     for k, v in pairs(store) do
         if fn(k, v) then
@@ -57,13 +57,13 @@ local function filter_store(store, fn)
     return results
 end
 
-local function starts_with(str, prefix)
+function KV.starts_with(str, prefix)
     return str:sub(1, #prefix) == prefix
 end
 
 function KV:getPrefix(prefix)
-    return filter_store(self.store, function(k, _)
-        return starts_with(k, prefix)
+    return KV.filter_store(self.store, function(k, _)
+        return KV.starts_with(k, prefix)
     end)
 end
 
