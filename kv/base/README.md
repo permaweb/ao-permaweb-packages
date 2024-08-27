@@ -7,7 +7,7 @@
 
 # Usage
 1. Require
-    `local KV = require("@aopermawebpackages/kv-base")`
+    `KV = require("@aopermawebpackages/kv-base")`
 2. Instantiate
     ```
     local storeName = "aStore"
@@ -17,6 +17,7 @@
     ```
 3. Set
     ```
+   local nameKey = "FancyName"
    store:set(nameKey, "BobbaBouey")
    ```
 4. Get
@@ -32,3 +33,9 @@
 `export PATH=$PATH:/home/jessop/.luarocks/bin`
 ## Testing
 `busted`
+
+# APM Publish
+
+1. Run build script
+    `./build/sh`
+2. Publish `main.lua` from `dist/`
