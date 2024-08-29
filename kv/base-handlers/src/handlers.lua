@@ -1,19 +1,32 @@
 local KV = require('kv')
-local utils = require('utils')
+local json = require('json')
+--local utils = require('utils')
 
-local ACTIONS = {
+local BH = {}
+
+BH.ACTIONS = {
     KV_SET = "KvSet",
     KV_GET = "KvGet"
 }
 
-local TAGS = {
+BH.TAGS = {
     KV_KEY = "KV_KEY",
     KV_VALUE = "KV_VALUE",
     KV_NAME = "KV_NAME"
 }
+function BH.decodeMessageData(data)
+    local status, decodedData = pcall(json.decode, data)
+
+    if not status or type(decodedData) ~= 'table' then
+        return false, nil
+    end
+
+    return true, decodedData
+end
+
 
 local function kvSet(msg)
-    local decodeCheck, data = utils.decodeMessageData(msg.Data)
+    local decodeCheck, data = BH.decodeMessageData(msg.Data)
     if not decodeCheck then
         ao.send({
             Target = msg.From,
@@ -24,13 +37,12 @@ local function kvSet(msg)
                 'Invalid Data'
             }
         })
-        data = {}
         return
     end
 
-    local kv_key = msg.tags[TAGS.KV_KEY] or data and data[TAGS.KV_KEY]
-    local kv_value = msg.tags[TAGS.KV_VALUE] or data and data[TAGS.KV_VALUE]
-    local kv_name = msg.tags[TAGS.KV_NAME] or data and data[TAGS.KV_NAME]
+    local kv_key = msg.tags[BH.TAGS.KV_KEY] or data and data[BH.TAGS.KV_KEY]
+    local kv_value = msg.tags[BH.TAGS.KV_VALUE] or data and data[BH.TAGS.KV_VALUE]
+    local kv_name = msg.tags[BH.TAGS.KV_NAME] or data and data[BH.TAGS.KV_NAME]
 
     if not kv_key or not kv_value or not kv_name then
         ao.send({
@@ -42,7 +54,6 @@ local function kvSet(msg)
                 'Invalid Data'
             }
         })
-        data = {}
         return
     end
 
@@ -57,7 +68,6 @@ local function kvSet(msg)
                     Message = kvNewResult
                 }
             })
-            data = {}
             return
         end
     end
@@ -77,7 +87,7 @@ local function kvSet(msg)
 end
 
 local function kvGet(msg)
-    local decodeCheck, data = utils.decodeMessageData(msg.Data)
+    local decodeCheck, data = BH.decodeMessageData(msg.Data)
     if not decodeCheck then
         ao.send({
             Target = msg.From,
@@ -88,12 +98,11 @@ local function kvGet(msg)
                 'Invalid Data'
             }
         })
-        data = {}
         return
     end
 
-    local kv_key = msg.tags[TAGS.KV_KEY] or data and data[TAGS.KV_KEY]
-    local kv_name = msg.tags[TAGS.KV_NAME] or data and data[TAGS.KV_NAME]
+    local kv_key = msg.tags[BH.TAGS.KV_KEY] or data and data[BH.TAGS.KV_KEY]
+    local kv_name = msg.tags[BH.TAGS.KV_NAME] or data and data[BH.TAGS.KV_NAME]
 
     if not kv_key or not kv_name then
         ao.send({
@@ -146,14 +155,18 @@ local function kvGet(msg)
     })
 end
 
-Handlers.add(
-        ACTIONS.KV_SET,
-        Handlers.utils.hasMatchingTag("Action", ACTIONS.KV_SET),
-        kvSet
-)
+function BH.install()
+    Handlers.add(
+            BH.ACTIONS.KV_SET,
+            Handlers.utils.hasMatchingTag("Action", BH.ACTIONS.KV_SET),
+            kvSet
+    )
 
-Handlers.add(
-        ACTIONS.KV_GET,
-        Handlers.utils.hasMatchingTag("Action", ACTIONS.KV_GET),
-        kvGet
-)
+    Handlers.add(
+            BH.ACTIONS.KV_GET,
+            Handlers.utils.hasMatchingTag("Action", BH.ACTIONS.KV_GET),
+            kvGet
+    )
+end
+
+return BH
