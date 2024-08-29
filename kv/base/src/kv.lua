@@ -1,10 +1,10 @@
-if not KV then KV = {} end
+local KV = {}
 KV.__index = KV
-if not KV.authFns then KV.authFns = {} end
-if not KV.stores then KV.stores = {} end
+KV.authFns = {}
+KV.stores = {}
 
 function KV.new(label, authFn)
-    function defaultAuthFn(msg)
+    local function defaultAuthFn(msg)
         return msg.From == Owner
     end
 
