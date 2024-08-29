@@ -1,3 +1,3 @@
 globals = {
-"KV", "Owner"
+"Owner"
 }
