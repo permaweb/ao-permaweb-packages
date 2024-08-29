@@ -4,7 +4,7 @@ if not KV.authFns then KV.authFns = {} end
 if not KV.stores then KV.stores = {} end
 
 function KV.new(label, authFn)
-    function defaultAuthFn(msg)
+    local function defaultAuthFn(msg)
         return msg.From == Owner
     end
 
