@@ -1,21 +1,28 @@
-local KV = {}
+if not KV then KV = {} end
 KV.__index = KV
-KV.stores = {}
+if not KV.authFns then KV.authFns = {} end
+if not KV.stores then KV.stores = {} end
 
-function KV.new(label)
+function KV.new(label, authFn)
+    function defaultAuthFn(msg)
+        return msg.From == Owner
+    end
+
     if type(label) ~= "string" then
-        print("error")
+        print("error invalid label")
         error("Invalid label")
     end
+
     if KV.stores[label] then
-        print("error")
+        print("error already exists")
         error("Store " .. label .. "  already exists")
     end
-    --print('LABEL' .. label)
+
     local self = setmetatable({}, KV)
     self.label = label
     self.store = {}
     KV.stores[label] = self
+    KV.authFns[label] = authFn or defaultAuthFn
     return true
 end
 
