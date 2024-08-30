@@ -1,18 +1,19 @@
-local KV = require('kv')
+local KV = require("@aopermawebpackages/kv-base")
 local json = require('json')
 
 local BH = {}
 
 BH.ACTIONS = {
-    KV_SET = "KvSet",
-    KV_GET = "KvGet"
+    KV_SET = "aop.Kv-Set",
+    KV_GET = "aop.Kv-Get"
 }
 
 BH.TAGS = {
-    KV_KEY = "KV_KEY",
-    KV_VALUE = "KV_VALUE",
-    KV_NAME = "KV_NAME"
+    KV_KEY = "Kv-Key",
+    KV_VALUE = "Kv-Value",
+    KV_NAME = "Kv-Store-Name"
 }
+
 function BH.decodeMessageData(data)
     local status, decodedData = pcall(json.decode, data)
 
@@ -39,11 +40,11 @@ local function kvSet(msg)
         return
     end
 
-    local kv_key = msg.tags[BH.TAGS.KV_KEY] or data and data[BH.TAGS.KV_KEY]
-    local kv_value = msg.tags[BH.TAGS.KV_VALUE] or data and data[BH.TAGS.KV_VALUE]
-    local kv_name = msg.tags[BH.TAGS.KV_NAME] or data and data[BH.TAGS.KV_NAME]
+    local kv_key = msg.Tags[BH.TAGS.KV_KEY] or data and data[BH.TAGS.KV_KEY]
+    local kv_value = msg.Tags[BH.TAGS.KV_VALUE] or data and data[BH.TAGS.KV_VALUE]
+    local kv_store_name = msg.Tags[BH.TAGS.KV_NAME] or data and data[BH.TAGS.KV_NAME]
 
-    if not kv_key or not kv_value or not kv_name then
+    if not kv_key or not kv_value or not kv_store_name then
         ao.send({
             Target = msg.From,
             Action = 'Input-Error',
@@ -56,8 +57,8 @@ local function kvSet(msg)
         return
     end
 
-    if not KV.stores[kv_name] then
-        local kvNewStatus, kvNewResult = pcall(KV.new, kv_name)
+    if not KV.stores[kv_store_name] then
+        local kvNewStatus, kvNewResult = pcall(KV.new, kv_store_name)
         if not kvNewStatus then
             ao.send({
                 Target = msg.From,
@@ -71,7 +72,7 @@ local function kvSet(msg)
         end
     end
 
-    local store = KV.stores[kv_name]
+    local store = KV.stores[kv_store_name]
     store:set(kv_key, kv_value)
 
     ao.send({
@@ -80,12 +81,13 @@ local function kvSet(msg)
         Data = {
             KV_KEY = kv_key,
             KV_VALUE = kv_value,
-            KV_NAME = kv_name
+            KV_NAME = kv_store_name
         }
     })
 end
 
 local function kvGet(msg)
+
     local decodeCheck, data = BH.decodeMessageData(msg.Data)
     if not decodeCheck then
         ao.send({
@@ -99,24 +101,24 @@ local function kvGet(msg)
         })
         return
     end
+    local kv_key = msg.Tags[BH.TAGS.KV_KEY] or data and data[BH.TAGS.KV_KEY]
+    local kv_store_name = msg.Tags[BH.TAGS.KV_NAME] or data and data[BH.TAGS.KV_NAME]
 
-    local kv_key = msg.tags[BH.TAGS.KV_KEY] or data and data[BH.TAGS.KV_KEY]
-    local kv_name = msg.tags[BH.TAGS.KV_NAME] or data and data[BH.TAGS.KV_NAME]
-
-    if not kv_key or not kv_name then
+    if not kv_key or not kv_store_name then
         ao.send({
             Target = msg.From,
             Action = 'Input-Error',
             Tags = {
                 Status = 'Error',
                 Message =
-                'Invalid Data'
+                'Missing Key or Store Name'
             }
         })
         return
     end
 
-    if not KV.stores[kv_name] then
+
+    if not KV.stores[kv_store_name] then
         ao.send({
             Target = msg.From,
             Action = 'Error',
@@ -129,7 +131,7 @@ local function kvGet(msg)
         return
     end
 
-    local store = KV.stores[kv_name]
+    local store = KV.stores[kv_store_name]
     local kv_value = store:get(kv_key)
     if kv_value == nil then
         ao.send({
@@ -138,7 +140,7 @@ local function kvGet(msg)
             Data = {
                 KV_KEY = kv_key,
                 KV_VALUE = nil,
-                KV_NAME = kv_name
+                KV_NAME = kv_store_name
             }
         })
         return
@@ -146,11 +148,11 @@ local function kvGet(msg)
     ao.send({
         Target = msg.From,
         Action = 'KV_GET_SUCCESS',
-        Data = {
+        Data = json.encode({
             KV_KEY = kv_key,
             KV_VALUE = kv_value,
-            KV_NAME = kv_name
-        }
+            KV_NAME = kv_store_name
+        })
     })
 end
 
@@ -167,5 +169,7 @@ function BH.install()
             kvGet
     )
 end
+
+BH.install()
 
 return BH
