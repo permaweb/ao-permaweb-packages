@@ -70,3 +70,10 @@ Data: stringified json:
 ```
 Send({Target = ao.id, Tags = { Action = "aop.Kv-Set", Kv-Key = "Hat", Kv-Value = "Kv-Store-Name = "SomeStore" },  Data = "{}" })
 ```
+
+# Contribute
+
+1. cd into this directory `ao-permaweb-packages/kv/base-handlers`
+2. Make changes to `src/handlers.lua`
+3. Run `./build.sh`
+4. Publish `dist/main.lua`

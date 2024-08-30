@@ -5,7 +5,12 @@ local BH = {}
 
 BH.ACTIONS = {
     KV_SET = "aop.Kv-Set",
-    KV_GET = "aop.Kv-Get"
+    KV_GET = "aop.Kv-Get",
+    KV_SET_SUCCESS = "aop.Kv-Set-Success",
+    KV_GET_SUCCESS = "aop.Kv-Get-Success",
+    KV_GET_NOT_FOUND = "aop.Kv-Get-Not-Found",
+    KV_INPUT_ERROR = "aop.Kv-Error-Input",
+    KV_UNK_ERROR = "aop.Kv-Error-Unknown"
 }
 
 BH.TAGS = {
@@ -24,13 +29,12 @@ function BH.decodeMessageData(data)
     return true, decodedData
 end
 
-
 local function kvSet(msg)
     local decodeCheck, data = BH.decodeMessageData(msg.Data)
     if not decodeCheck then
         ao.send({
             Target = msg.From,
-            Action = 'Input-Error',
+            Action = BH.ACTIONS.KV_INPUT_ERROR,
             Tags = {
                 Status = 'Error',
                 Message =
@@ -47,11 +51,11 @@ local function kvSet(msg)
     if not kv_key or not kv_value or not kv_store_name then
         ao.send({
             Target = msg.From,
-            Action = 'Input-Error',
+            Action = BH.ACTIONS.KV_INPUT_ERROR,
             Tags = {
                 Status = 'Error',
                 Message =
-                'Invalid Data'
+                'Missing key, value, or store_name'
             }
         })
         return
@@ -62,7 +66,7 @@ local function kvSet(msg)
         if not kvNewStatus then
             ao.send({
                 Target = msg.From,
-                Action = 'Input-Error',
+                Action = BH.ACTIONS.KV_UNK_ERROR,
                 Tags = {
                     Status = 'Error',
                     Message = kvNewResult
@@ -77,12 +81,12 @@ local function kvSet(msg)
 
     ao.send({
         Target = msg.From,
-        Action = 'KV_SET_SUCCESS',
-        Data = {
+        Action = BH.ACTIONS.KV_SET_SUCCESS,
+        Data = json.encode({
             KV_KEY = kv_key,
             KV_VALUE = kv_value,
             KV_NAME = kv_store_name
-        }
+        })
     })
 end
 
@@ -92,7 +96,7 @@ local function kvGet(msg)
     if not decodeCheck then
         ao.send({
             Target = msg.From,
-            Action = 'Input-Error',
+            Action = BH.ACTIONS.KV_INPUT_ERROR,
             Tags = {
                 Status = 'Error',
                 Message =
@@ -107,7 +111,7 @@ local function kvGet(msg)
     if not kv_key or not kv_store_name then
         ao.send({
             Target = msg.From,
-            Action = 'Input-Error',
+            Action = BH.ACTIONS.KV_INPUT_ERROR,
             Tags = {
                 Status = 'Error',
                 Message =
@@ -125,7 +129,7 @@ local function kvGet(msg)
             Tags = {
                 Status = 'Error',
                 Message =
-                'KV_NAME not found'
+                "Store with name " .. tostring(kv_store_name) .. " not found"
             }
         })
         return
@@ -136,18 +140,18 @@ local function kvGet(msg)
     if kv_value == nil then
         ao.send({
             Target = msg.From,
-            Action = 'KV_GET_NOT_FOUND', -- what if null?
-            Data = {
+            Action = BH.ACTIONS.KV_GET_NOT_FOUND, -- what if null?
+            Data = json.encode({
                 KV_KEY = kv_key,
                 KV_VALUE = nil,
                 KV_NAME = kv_store_name
-            }
+            })
         })
         return
     end
     ao.send({
         Target = msg.From,
-        Action = 'KV_GET_SUCCESS',
+        Action = BH.ACTIONS.KV_GET_SUCCESS,
         Data = json.encode({
             KV_KEY = kv_key,
             KV_VALUE = kv_value,

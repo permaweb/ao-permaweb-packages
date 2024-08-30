@@ -10,4 +10,11 @@ if [ ! -d "dist" ]; then
 fi
 
 $BIN_PATH/amalg.lua -o dist/main.lua -s src/handlers.lua
+
+# Check if dist/main.lua is not empty
+if [ ! -s dist/main.lua ]; then
+    echo "Error: dist/main.lua is empty"
+    exit 1
+fi
+
 $BIN_PATH/luacheck dist/main.lua
