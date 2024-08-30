@@ -7,14 +7,14 @@ Installs set and get handlers.
 
 # Usage
 ## Get
-Will get a key
+Will get a value given a Kv-Key and Kv-Store-Name
 
 Params:
 - Action: aop.Kv-Get
 - Key Tag: Kv-Key
 - Store Name Tag: Kv-Store-Name
 
-On Success, returns:
+### Returns On Success
 
 Action: "aop.Kv-Get-Success"
 
@@ -27,7 +27,7 @@ Data: stringified json:
 }
 ```
 
-On Not Found, returns
+### Returns On Not Found
 
 Action: "aop.Kv-Get-Not-Found"
 
@@ -53,7 +53,7 @@ Will Set a key value pair in a named store, creating that store if necessary.
 - Value Tag: Kv-Value
 - Store Name Tag: Kv-Store-Name
 
-### On Success returns:
+### Returns On Success
 
 Action: "aop.Kv-Set-Success"
 
@@ -62,19 +62,6 @@ Data: stringified json:
 {
   KV_KEY = kv_key,
   KV_VALUE = kv_value,
-  KV_NAME = kv_store_name
-}
-```
-
-On Not Found, returns
-
-Action: "aop.Kv-Get-Not-Found"
-
-Data: stringified json:
-```
-{
-  KV_KEY = kv_key,
-  KV_VALUE = nil,
   KV_NAME = kv_store_name
 }
 ```
