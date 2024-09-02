@@ -1,14 +1,18 @@
 local KV = {}
 KV.__index = KV
 
-function KV.new(label, authFn)
+function KV.new(plugins)
 
-    if type(label) ~= "string" then
-        print("error invalid label")
-        error("Invalid label")
+    if type(plugins) ~= "table" and type(plugins) ~= "nil" then
+        print("invalid plugins")
+        error("Invalid plugins arg, must be table or nil")
     end
 
     local self = setmetatable({}, KV)
+
+    if type(plugins) == "table" then
+
+    end
     self.label = label
     self.store = {}
     return self
@@ -42,6 +46,17 @@ function KV:keys()
     return keys
 end
 
+function KV:registerPlugin(pluginName, pluginFunction)
+    if type(pluginName) ~= "string" or type(pluginFunction) ~= "function" then
+        error("Invalid plugin name or function")
+    end
+    if self[pluginName] then
+       error(pluginName .. " already exists" )
+    end
+
+    self[pluginName] = pluginFunction
+end
+
 function KV.filter_store(store, fn)
     local results = {}
     for k, v in pairs(store) do
@@ -56,10 +71,14 @@ function KV.starts_with(str, prefix)
     return str:sub(1, #prefix) == prefix
 end
 
-function KV:getPrefix(prefix)
+function KV:getPrefix(str)
     return KV.filter_store(self.store, function(k, _)
-        return KV.starts_with(k, prefix)
+        return KV.starts_with(k, str)
     end)
+end
+
+function KV:ge(matchFn)
+    return matchFn(KV)
 end
 
 return KV

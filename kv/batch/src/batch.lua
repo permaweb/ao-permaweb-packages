@@ -1,12 +1,15 @@
+local KV = require('kv')
 
 local Batch = {}
 Batch.__index = Batch
 
-function Batch.new()
+function Batch.new(kv)
 	local self = setmetatable({}, Batch)
 	self.operations = {}
 	return self
 end
+
+
 
 function Batch:set(keyString, value)
     table.insert(self.operations, { op = "set", key = keyString, value = value })

@@ -13,8 +13,7 @@ end
 describe("Should set and get simple strings", function()
     it("should create, set and get", function()
         local nameKey = "@x:Name"
-        local storeName = "aStore"
-        local status, result = pcall(KV.new, storeName)
+        local status, result = pcall(KV.new)
         if not status then
             print(result)
             return result
@@ -29,17 +28,11 @@ describe("Should set and get simple strings", function()
         local keys = store:keys()
         assert.are.same(keys[1], nameKey )
     end)
-    it("should error on bad create label", function()
-        local storeName = 6
-        local status, _ = pcall(KV.new, storeName)
-        assert.are.same(status, false)
-    end)
 end)
 
 describe("By prefix", function()
     it("should set multiple and get by prefix key", function()
-        local storeName = "bStore"
-        local status, result = pcall(KV.new, storeName)
+        local status, result = pcall(KV.new)
         local bStore = result
         assert.are.same(status, true)
         bStore:set("@x:Fruit:1:", "apple")
