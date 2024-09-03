@@ -10,10 +10,13 @@ function KV.new(plugins)
 
     local self = setmetatable({}, KV)
 
-    if type(plugins) == "table" then
-
+    if plugins and type(plugins) == "table" then
+        for _, plugin in ipairs(plugins) do
+            if type(plugin) == "table" and plugin.register then
+                plugin.register(self)
+            end
+        end
     end
-    self.label = label
     self.store = {}
     return self
 end
