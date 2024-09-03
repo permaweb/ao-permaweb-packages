@@ -80,10 +80,6 @@ function KV:getPrefix(str)
     end)
 end
 
-function KV:ge(matchFn)
-    return matchFn(KV)
-end
-
 return KV
 
 
