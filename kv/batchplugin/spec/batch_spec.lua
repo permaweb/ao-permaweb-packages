@@ -9,9 +9,12 @@ describe("Should set and get simple strings", function()
 
         -- Create a KV instance with the batch plugin
         local myKV = KV.new({batchPlugin})
+
+        -- Set a key using base method
         myKV:set("president", "Steve")
         local president = myKV:get("president")
         assert.are.same(president, "Steve")
+
         -- Use the batch methods via the KV instance
         local b = myKV:batchInit()
         b:set("count", 1)
@@ -19,7 +22,7 @@ describe("Should set and get simple strings", function()
 
         -- Execute batch operations
         b:execute()
-        local president = myKV:get("vice-president")
-        assert.are.same(president, "John")
+        assert.are.same(myKV:get("vice-president"), "John")
+        assert.are.same(myKV:get("count"), 1)
     end)
 end)
