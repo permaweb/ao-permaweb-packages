@@ -30,7 +30,7 @@
 ## Luarocks
 `sudo apt install luarocks`
 `luarocks install busted --local`
-`export PATH=$PATH:/home/jessop/.luarocks/bin`
+`export PATH=$PATH:$HOME/.luarocks/bin`
 ## Testing
 `busted`
 
