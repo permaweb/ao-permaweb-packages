@@ -1,29 +1,24 @@
 local KV = {}
 KV.__index = KV
-KV.authFns = {}
-KV.stores = {}
 
-function KV.new(label, authFn)
-    local function defaultAuthFn(msg)
-        return msg.From == Owner
-    end
+function KV.new(plugins)
 
-    if type(label) ~= "string" then
-        print("error invalid label")
-        error("Invalid label")
-    end
-
-    if KV.stores[label] then
-        print("error already exists")
-        error("Store " .. label .. "  already exists")
+    if type(plugins) ~= "table" and type(plugins) ~= "nil" then
+        print("invalid plugins")
+        error("Invalid plugins arg, must be table or nil")
     end
 
     local self = setmetatable({}, KV)
-    self.label = label
+
+    if plugins and type(plugins) == "table" then
+        for _, plugin in ipairs(plugins) do
+            if type(plugin) == "table" and plugin.register then
+                plugin.register(self)
+            end
+        end
+    end
     self.store = {}
-    KV.stores[label] = self
-    KV.authFns[label] = authFn or defaultAuthFn
-    return true
+    return self
 end
 
 function KV:get(keyString)
@@ -54,6 +49,17 @@ function KV:keys()
     return keys
 end
 
+function KV:registerPlugin(pluginName, pluginFunction)
+    if type(pluginName) ~= "string" or type(pluginFunction) ~= "function" then
+        error("Invalid plugin name or function")
+    end
+    if self[pluginName] then
+       error(pluginName .. " already exists" )
+    end
+
+    self[pluginName] = pluginFunction
+end
+
 function KV.filter_store(store, fn)
     local results = {}
     for k, v in pairs(store) do
@@ -68,9 +74,9 @@ function KV.starts_with(str, prefix)
     return str:sub(1, #prefix) == prefix
 end
 
-function KV:getPrefix(prefix)
+function KV:getPrefix(str)
     return KV.filter_store(self.store, function(k, _)
-        return KV.starts_with(k, prefix)
+        return KV.starts_with(k, str)
     end)
 end
 
