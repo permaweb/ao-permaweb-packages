@@ -1,6 +1,9 @@
-local KV = {}
-KV.__index = KV
 
+
+local KV = {}
+
+KV.__index = KV
+local KVPackageName = "@permaweb/kv-base"
 function KV.new(plugins)
 
     if type(plugins) ~= "table" and type(plugins) ~= "nil" then
@@ -80,11 +83,6 @@ function KV:getPrefix(str)
     end)
 end
 
+package.loaded[KVPackageName] = KV
+
 return KV
-
-
-
-
-
-
-

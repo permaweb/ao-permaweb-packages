@@ -1,5 +1,5 @@
 local BatchPlugin = {}
-
+local PackageName = "@permaweb/kv-batch"
 function BatchPlugin.new()
     local plugin = {}
 
@@ -39,5 +39,7 @@ function BatchPlugin.new()
 
     return plugin
 end
+
+package.loaded[PackageName] = BatchPlugin
 
 return BatchPlugin
