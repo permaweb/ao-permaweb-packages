@@ -13,8 +13,13 @@ if package.loaded[PackageName] then
     return package.loaded[PackageName]
 end
 
-if not myKV then myKV = KV.new({BatchPlugin}) end
-local Profile = {}
+if not Profile then Profile = {} end
+if not Profile.profileKV then Profile.profileKV = KV.new({BatchPlugin}) end
+
+Profile.PROFILE_SET = "Profile-Set"
+Profile.PROFILE_GET = "Profile-Get"
+Profile.PROFILE_ERROR = "Profile-Error"
+Profile.PROFILE_SUCCESS = "Profile-Success"
 
 function Profile.decodeMessageData(data)
     local status, decodedData = pcall(json.decode, data)
@@ -25,12 +30,17 @@ function Profile.decodeMessageData(data)
     return true, decodedData
 end
 
+
+function Profile.hello()
+    print("Hello profile")
+end
+
 function Profile.profileSet(msg)
     local decodeCheck, data = Profile.decodeMessageData(msg.Data)
     if not decodeCheck then
         ao.send({
             Target = msg.From,
-            Action = ACTIONS.PROFILE_ERROR,
+            Action = Profile.PROFILE_ERROR,
             Tags = {
                 Status = 'Error',
                 Message =
@@ -40,20 +50,46 @@ function Profile.profileSet(msg)
         return
     end
 
-    local entries = decodeCheck and data.entries
+    local entries = data.entries
 
-    if #entries > 1 then
-        local batch = myKV.batchInit()
-        for k, v in pairs(entries) do
-            batch:set(k, v)
+    local testkeys = {}
+
+    if #entries then
+        for _, entry in ipairs(entries) do
+            if entry.key and entry.value then
+                table.insert(testkeys, entry.key)
+                Profile.profileKV:set(entry.key, entry.value)
+            end
         end
-        batch:execute()
+        ao.send({
+            Target = msg.From,
+            Action = Profile.PROFILE_SUCCESS,
+            Tags =  {
+                Value1 = Profile.profileKV:get(testkeys[1]),
+                Key1 = testkeys[1]
+            },
+            Data = json.encode({ First = Profile.profileKV:get(testkeys[1]) })
+        })
+        return
     end
-
-    ao.send({
-        Target = msg.From,
-        Action = ACTIONS.PROFILE_SUCCESS,
-    })
+    --if #entries > 1 then
+    --    local batch = Profile.profileKV.batchInit()
+    --    for k, v in pairs(entries) do
+    --        table.insert(testkeys, k)
+    --
+    --        batch:set(k, v)
+    --    end
+    --    batch:execute()
+    --end
+    --
+    --ao.send({
+    --    Target = msg.From,
+    --    Action = Profile.PROFILE_SUCCESS,
+    --    Tags =  {
+    --        First = Profile.profileKV:get(testkeys[1]),
+    --    },
+    --    Data = json.encode({ Test = "2", First = Profile.profileKV:get(testkeys[1]) })
+    --})
 end
 
 function Profile.profileGet(msg)
@@ -62,7 +98,7 @@ function Profile.profileGet(msg)
     if not decodeCheck then
         ao.send({
             Target = msg.From,
-            Action = ACTIONS.PROFILE_ERROR,
+            Action = Profile.PROFILE_ERROR,
             Tags = {
                 Status = 'Error',
                 Message =
@@ -78,40 +114,31 @@ function Profile.profileGet(msg)
         error("no keys")
     end
 
-    if keys and #keys then
+    if keys then
         local results = {}
-        for k, v in pairs(keys) do
-            results[k] = v
-
+        for _, k in ipairs(keys) do
+            results[k] = Profile.profileKV:get(k)
         end
         ao.send({
             Target = msg.From,
-            Action = ACTIONS.PROFILE_SUCCESS,
-            Data = json.encode(results)
+            Action = Profile.PROFILE_SUCCESS,
+            Data = json.encode({Results = results} )
         })
     end
 end
 
-local ACTIONS = {
-    PROFILE_SET = "Profile-Set",
-    PROFILE_GET = "Profile-Get",
-    PROFILE_ERROR = "Profile-Error",
-    PROFILE_SUCCESS = "Profile-Success"
-}
-
+Handlers.remove(Profile.PROFILE_SET)
 Handlers.add(
-        ACTIONS.PROFILE_SET,
-        Handlers.utils.hasMatchingTag("Action", ACTIONS.PROFILE_SET),
+        Profile.PROFILE_SET,
+        Handlers.utils.hasMatchingTag("Action", Profile.PROFILE_SET),
         Profile.profileSet
 )
 
 Handlers.add(
-        ACTIONS.PROFILE_GET,
-        Handlers.utils.hasMatchingTag("Action", ACTIONS.PROFILE_GET),
+        Profile.PROFILE_GET,
+        Handlers.utils.hasMatchingTag("Action", Profile.PROFILE_GET),
         Profile.profileGet
 )
 
-
-
-package.loaded[PackageName] = Profile
+return Profile
 
