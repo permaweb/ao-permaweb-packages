@@ -603,8 +603,6 @@ if not package.loaded['batch'] then package.loaded['batch'] = load_batch() end
 -- ================================================================================
 -- ================================================================================
 local function load_profile()
-
-
 local PackageName = "@permaweb/profile"
 local KV = require("@permaweb/kv-base")
 if not KV then
