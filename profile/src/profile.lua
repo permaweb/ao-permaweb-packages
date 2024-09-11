@@ -133,7 +133,7 @@ Handlers.add(
         Handlers.utils.hasMatchingTag("Action", Profile.PROFILE_SET),
         Profile.profileSet
 )
-
+Handlers.remove(Profile.PROFILE_GET)
 Handlers.add(
         Profile.PROFILE_GET,
         Handlers.utils.hasMatchingTag("Action", Profile.PROFILE_GET),
