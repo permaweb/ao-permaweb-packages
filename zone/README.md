@@ -8,9 +8,9 @@
 .load path/to/bundle.lua
 .editor
 <editor mode> use '.done' to submit or '.cancel' to cancel
-local P = require("@permaweb/profile")
-P.profileKV:set("tree", "green")
-print(P.profileKV:get("boots"))
+local P = require("@permaweb/zone")
+P.zoneKV:set("tree", "green")
+print(P.zoneKV:get("boots"))
 .done
 RETURNS:
 black
@@ -27,7 +27,7 @@ black
   "tags": [
     {
       "name": "Action",
-      "value": "Profile-Set"
+      "value": "Zone-Metadata.Set"
     }
   ]
 }
@@ -43,7 +43,7 @@ INPUT
   "tags": [
     {
       "name": "Action",
-      "value": "Profile-Get"
+      "value": "Zone-Metadata.Get"
     }
   ]
 }

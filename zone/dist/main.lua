@@ -1,4 +1,4 @@
-local PackageName = "@permaweb/profile"
+local PackageName = "@permaweb/zone"
 local KV = require("@permaweb/kv-base")
 if not KV then
     error("KV Not found, install it")
@@ -13,15 +13,17 @@ if package.loaded[PackageName] then
     return package.loaded[PackageName]
 end
 
-if not Profile then Profile = {} end
-if not Profile.profileKV then Profile.profileKV = KV.new({BatchPlugin}) end
+if not Zone then Zone = {} end
+if not Zone.zoneKV then Zone.zoneKV = KV.new({BatchPlugin}) end
 
-Profile.PROFILE_SET = "Profile-Set"
-Profile.PROFILE_GET = "Profile-Get"
-Profile.PROFILE_ERROR = "Profile-Error"
-Profile.PROFILE_SUCCESS = "Profile-Success"
+-- handlers
+Zone.ZONE_M_SET = "Zone-Metadata.Set"
+Zone.ZONE_M_GET = "Zone-Metadata.Get"
+Zone.ZONE_M_ERROR = "Zone-Metadata.Error"
+Zone.ZONE_M_SUCCESS = "Zone-Metadata.Success"
+Zone.ZONE_INFO = "Zone-Info"
 
-function Profile.decodeMessageData(data)
+function Zone.decodeMessageData(data)
     local status, decodedData = pcall(json.decode, data)
     if not status or type(decodedData) ~= 'table' then
         return false, nil
@@ -31,16 +33,16 @@ function Profile.decodeMessageData(data)
 end
 
 
-function Profile.hello()
-    print("Hello profile")
+function Zone.hello()
+    print("Hello zone")
 end
 
-function Profile.profileSet(msg)
-    local decodeCheck, data = Profile.decodeMessageData(msg.Data)
+function Zone.zoneSet(msg)
+    local decodeCheck, data = Zone.decodeMessageData(msg.Data)
     if not decodeCheck then
         ao.send({
             Target = msg.From,
-            Action = Profile.PROFILE_ERROR,
+            Action = Zone.ZONE_M_ERROR,
             Tags = {
                 Status = 'Error',
                 Message =
@@ -58,22 +60,22 @@ function Profile.profileSet(msg)
         for _, entry in ipairs(entries) do
             if entry.key and entry.value then
                 table.insert(testkeys, entry.key)
-                Profile.profileKV:set(entry.key, entry.value)
+                Zone.zoneKV:set(entry.key, entry.value)
             end
         end
         ao.send({
             Target = msg.From,
-            Action = Profile.PROFILE_SUCCESS,
+            Action = Zone.ZONE_M_SUCCESS,
             Tags =  {
-                Value1 = Profile.profileKV:get(testkeys[1]),
+                Value1 = Zone.zoneKV:get(testkeys[1]),
                 Key1 = testkeys[1]
             },
-            Data = json.encode({ First = Profile.profileKV:get(testkeys[1]) })
+            Data = json.encode({ First = Zone.zoneKV:get(testkeys[1]) })
         })
         return
     end
     --if #entries > 1 then
-    --    local batch = Profile.profileKV.batchInit()
+    --    local batch = Zone.zoneKV.batchInit()
     --    for k, v in pairs(entries) do
     --        table.insert(testkeys, k)
     --
@@ -84,21 +86,21 @@ function Profile.profileSet(msg)
     --
     --ao.send({
     --    Target = msg.From,
-    --    Action = Profile.PROFILE_SUCCESS,
+    --    Action = Zone.ZONE_M_SUCCESS,
     --    Tags =  {
-    --        First = Profile.profileKV:get(testkeys[1]),
+    --        First = Zone.zoneKV:get(testkeys[1]),
     --    },
-    --    Data = json.encode({ Test = "2", First = Profile.profileKV:get(testkeys[1]) })
+    --    Data = json.encode({ Test = "2", First = Zone.zoneKV:get(testkeys[1]) })
     --})
 end
 
-function Profile.profileGet(msg)
+function Zone.zoneGet(msg)
 
-    local decodeCheck, data = Profile.decodeMessageData(msg.Data)
+    local decodeCheck, data = Zone.decodeMessageData(msg.Data)
     if not decodeCheck then
         ao.send({
             Target = msg.From,
-            Action = Profile.PROFILE_ERROR,
+            Action = Zone.ZONE_M_ERROR,
             Tags = {
                 Status = 'Error',
                 Message =
@@ -117,28 +119,28 @@ function Profile.profileGet(msg)
     if keys then
         local results = {}
         for _, k in ipairs(keys) do
-            results[k] = Profile.profileKV:get(k)
+            results[k] = Zone.zoneKV:get(k)
         end
         ao.send({
             Target = msg.From,
-            Action = Profile.PROFILE_SUCCESS,
+            Action = Zone.ZONE_M_SUCCESS,
             Data = json.encode({Results = results} )
         })
     end
 end
 
-Handlers.remove(Profile.PROFILE_SET)
+Handlers.remove(Zone.ZONE_M_SET)
 Handlers.add(
-        Profile.PROFILE_SET,
-        Handlers.utils.hasMatchingTag("Action", Profile.PROFILE_SET),
-        Profile.profileSet
+        Zone.ZONE_M_SET,
+        Handlers.utils.hasMatchingTag("Action", Zone.ZONE_M_SET),
+        Zone.zoneSet
 )
-Handlers.remove(Profile.PROFILE_GET)
+Handlers.remove(Zone.ZONE_M_GET)
 Handlers.add(
-        Profile.PROFILE_GET,
-        Handlers.utils.hasMatchingTag("Action", Profile.PROFILE_GET),
-        Profile.profileGet
+        Zone.ZONE_M_GET,
+        Handlers.utils.hasMatchingTag("Action", Zone.ZONE_M_GET),
+        Zone.zoneGet
 )
 
-return Profile
+return Zone
 

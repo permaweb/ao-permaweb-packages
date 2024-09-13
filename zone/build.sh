@@ -9,5 +9,5 @@ if [ ! -d "dist" ]; then
     mkdir dist
 fi
 
-#$BIN_PATH/luacheck src/profile.lua
-$BIN_PATH/amalg.lua -s src/profile.lua -o dist/main.lua
+#$BIN_PATH/luacheck src/zone.lua
+$BIN_PATH/amalg.lua -s src/zone.lua -o dist/main.lua
