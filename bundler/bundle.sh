@@ -10,13 +10,13 @@ FILES=(
     "./apm_client.lua"
     "../kv/base/src/kv.lua"
     "../kv/batchplugin/src/batch.lua"
-    "../profile/src/profile.lua"
+    "../zone/src/zone.lua"
 )
 
 declare -A FILE_MAP=(
     ["../kv/base/src/kv.lua"]="@permaweb/kv-base"
     ["../kv/batchplugin/src/batch.lua"]="@permaweb/kv-batch"
-    ["../profile/src/profile.lua"]="@permaweb/profile"
+    ["../zone/src/zone.lua"]="@permaweb/zone"
 )
 
 print_header() {

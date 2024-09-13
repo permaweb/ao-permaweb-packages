@@ -10,7 +10,7 @@
 <editor mode> use '.done' to submit or '.cancel' to cancel
 local P = require("@permaweb/zone")
 P.zoneKV:set("tree", "green")
-print(P.zoneKV:get("boots"))
+print(P.zoneKV:get("tree"))
 .done
 RETURNS:
 black
