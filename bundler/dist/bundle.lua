@@ -635,12 +635,30 @@ function Zone.decodeMessageData(data)
     return true, decodedData
 end
 
+function Zone.isAuthorized(msg)
+    if msg.From == Owner then
+        return true
+    end
+    return false
+end
 
 function Zone.hello()
     print("Hello zone")
 end
 
 function Zone.zoneSet(msg)
+    if not Zone.isAuthorized(msg) then
+        ao.send({
+            Target = msg.From,
+            Action = Zone.ZONE_M_ERROR,
+            Tags = {
+                Status = 'Error',
+                Message =
+                'Not Authorized'
+            }
+        })
+        return
+    end
     local decodeCheck, data = Zone.decodeMessageData(msg.Data)
     if not decodeCheck then
         ao.send({
