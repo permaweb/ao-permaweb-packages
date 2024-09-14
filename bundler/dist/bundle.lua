@@ -635,12 +635,31 @@ function Zone.decodeMessageData(data)
     return true, decodedData
 end
 
+function Zone.isAuthorized(msg)
+    if msg.From == Owner then
+        return true
+    end
+    return false
+end
 
 function Zone.hello()
     print("Hello zone")
 end
 
 function Zone.zoneSet(msg)
+
+    if Zone.isAuthorized(msg) ~= true then
+        ao.send({
+            Target = msg.From,
+            Action = Zone.ZONE_M_ERROR,
+            Tags = {
+                Status = 'Error',
+                Message =
+                'Not Authorized'
+            }
+        })
+        return
+    end
     local decodeCheck, data = Zone.decodeMessageData(msg.Data)
     if not decodeCheck then
         ao.send({
@@ -677,24 +696,6 @@ function Zone.zoneSet(msg)
         })
         return
     end
-    --if #entries > 1 then
-    --    local batch = Zone.zoneKV.batchInit()
-    --    for k, v in pairs(entries) do
-    --        table.insert(testkeys, k)
-    --
-    --        batch:set(k, v)
-    --    end
-    --    batch:execute()
-    --end
-    --
-    --ao.send({
-    --    Target = msg.From,
-    --    Action = Zone.ZONE_M_SUCCESS,
-    --    Tags =  {
-    --        First = Zone.zoneKV:get(testkeys[1]),
-    --    },
-    --    Data = json.encode({ Test = "2", First = Zone.zoneKV:get(testkeys[1]) })
-    --})
 end
 
 function Zone.zoneGet(msg)
@@ -732,13 +733,13 @@ function Zone.zoneGet(msg)
     end
 end
 
-Handlers.remove(Zone.ZONE_M_SET)
+--Handlers.remove(Zone.ZONE_M_SET)
 Handlers.add(
         Zone.ZONE_M_SET,
         Handlers.utils.hasMatchingTag("Action", Zone.ZONE_M_SET),
         Zone.zoneSet
 )
-Handlers.remove(Zone.ZONE_M_GET)
+--Handlers.remove(Zone.ZONE_M_GET)
 Handlers.add(
         Zone.ZONE_M_GET,
         Handlers.utils.hasMatchingTag("Action", Zone.ZONE_M_GET),
