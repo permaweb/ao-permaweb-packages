@@ -1,13 +1,14 @@
 #!/bin/bash
 set -e
 # Define the target file
-TARGET_FILE="./dist/bundle.lua"
+TARGET_FILE="./dist/bundle-trusted.lua"
 
 # Clear the target file if it exists
 > "$TARGET_FILE"
 
 FILES=(
     "./apm_client.lua"
+    "./trusted.lua"
     "../kv/base/src/kv.lua"
     "../kv/batchplugin/src/batch.lua"
     "../zone/src/zone.lua"
@@ -35,7 +36,7 @@ print_header() {
 
 # Append each file's content to the target file
 for FILE in "${FILES[@]}"; do
-    if [[ "$FILE" == *"apm"* ]]; then
+    if [[ "$FILE" == *"apm"* ]] || [[ "$FILE" == *"trusted"* ]]; then
         cat "$FILE" >> "$TARGET_FILE"
         continue
     fi
