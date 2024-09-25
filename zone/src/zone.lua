@@ -153,16 +153,17 @@ Handlers.add(
     Handlers.utils.hasMatchingTag("Action", "Zone-Uploads"),
     function (msg)
         print("Zone-Uploads")
-        -- AssetManager.get_uploads()
+        AssetManager.get_uploads()
+    end
+)
+
+Handlers.add(
+    "Zone-Uploads-2",
+    Handlers.utils.hasMatchingTag("Action", "Zone-Uploads"),
+    function (msg)
+        print("Zone-Uploads-2")
+        AssetManager.get_uploads()
     end
 )
 
 return Zone
-
--- Add asset manager path to bundle.sh FILES and FILE_MAP
--- Require asset-manager in zone.lua
--- Create a handler in zone.lua Zone.getAssets
--- In that handler run AssetManager.get_uploads
--- Run ./bundle.sh
--- Create a process
--- .load path/to/bundle.lua

@@ -168,9 +168,9 @@ function PublishAssignDownloadResponseHandler(msg)
 end
 
 Handlers.add("APM.PublishAssignDownloadResponseHandler", Handlers.utils.hasMatchingTag("Action", "APM.Publish"),
-        function(msg)
-            handle_run(PublishAssignDownloadResponseHandler, msg)
-        end)
+    function(msg)
+        handle_run(PublishAssignDownloadResponseHandler, msg)
+    end)
 
 function DownloadResponseHandler(msg)
     local pkgID = msg.Data
@@ -201,9 +201,9 @@ function RegisterVendorResponseHandler(msg)
 end
 
 Handlers.add("APM.RegisterVendorResponse", Handlers.utils.hasMatchingTag("Action", "APM.RegisterVendorResponse"),
-        function(msg)
-            handle_run(RegisterVendorResponseHandler, msg)
-        end)
+    function(msg)
+        handle_run(RegisterVendorResponseHandler, msg)
+    end)
 ----------------------------------------
 
 function PublishResponseHandler(msg)
@@ -313,9 +313,9 @@ function UpdateClientResponseHandler(msg)
 end
 
 Handlers.add("APM.UpdateClientResponse", Handlers.utils.hasMatchingTag("Action", "APM.UpdateClientResponse"),
-        function(msg)
-            handle_run(UpdateClientResponseHandler, msg)
-        end)
+    function(msg)
+        handle_run(UpdateClientResponseHandler, msg)
+    end)
 
 
 ----------------------------------------
@@ -441,13 +441,13 @@ end
 --return "📦 Loaded APM Client"
 table.insert(ao.authorities, 'fcoN_xJeisVsPXA-trzVAuIiqO3ydLQxM-L4XbrQKzY')
 Handlers.prepend("isTrusted",
-        function (msg)
-            return msg.From ~= msg.Owner and not ao.isTrusted(msg)
-        end,
-        function (msg)
-            Send({Target = msg.From, Data = "Message is not trusted."})
-            print("Message is not trusted. From: " .. msg.From .. " - Owner: " .. msg.Owner)
-        end
+    function(msg)
+        return msg.From ~= msg.Owner and not ao.isTrusted(msg)
+    end,
+    function(msg)
+        Send({ Target = msg.From, Data = "Message is not trusted." })
+        print("Message is not trusted. From: " .. msg.From .. " - Owner: " .. msg.Owner)
+    end
 )
 
 -- ================================================================================
@@ -456,94 +456,91 @@ Handlers.prepend("isTrusted",
 -- ================================================================================
 -- ================================================================================
 local function load_kv()
+    local KV = {}
 
+    KV.__index = KV
+    local KVPackageName = "@permaweb/kv-base"
+    function KV.new(plugins)
+        if type(plugins) ~= "table" and type(plugins) ~= "nil" then
+            print("invalid plugins")
+            error("Invalid plugins arg, must be table or nil")
+        end
 
-local KV = {}
+        local self = setmetatable({}, KV)
 
-KV.__index = KV
-local KVPackageName = "@permaweb/kv-base"
-function KV.new(plugins)
-
-    if type(plugins) ~= "table" and type(plugins) ~= "nil" then
-        print("invalid plugins")
-        error("Invalid plugins arg, must be table or nil")
-    end
-
-    local self = setmetatable({}, KV)
-
-    if plugins and type(plugins) == "table" then
-        for _, plugin in ipairs(plugins) do
-            if type(plugin) == "table" and plugin.register then
-                plugin.register(self)
+        if plugins and type(plugins) == "table" then
+            for _, plugin in ipairs(plugins) do
+                if type(plugin) == "table" and plugin.register then
+                    plugin.register(self)
+                end
             end
         end
-    end
-    self.store = {}
-    return self
-end
-
-function KV:get(keyString)
-    return self.store[keyString]
-end
-
-function KV:set(keyString, value)
-    self.store[keyString] = value
-end
-
-function KV:len()
-    local count = 0
-    for _ in pairs(self.store) do
-        count = count + 1
-    end
-    return count
-end
-
-function KV:del(keyString)
-    self.store[keyString] = nil
-end
-
-function KV:keys()
-    local keys = {}
-    for k, _ in pairs(self.store) do
-        table.insert(keys, k)
-    end
-    return keys
-end
-
-function KV:registerPlugin(pluginName, pluginFunction)
-    if type(pluginName) ~= "string" or type(pluginFunction) ~= "function" then
-        error("Invalid plugin name or function")
-    end
-    if self[pluginName] then
-       error(pluginName .. " already exists" )
+        self.store = {}
+        return self
     end
 
-    self[pluginName] = pluginFunction
-end
+    function KV:get(keyString)
+        return self.store[keyString]
+    end
 
-function KV.filter_store(store, fn)
-    local results = {}
-    for k, v in pairs(store) do
-        if fn(k, v) then
-            results[k] = v
+    function KV:set(keyString, value)
+        self.store[keyString] = value
+    end
+
+    function KV:len()
+        local count = 0
+        for _ in pairs(self.store) do
+            count = count + 1
         end
+        return count
     end
-    return results
-end
 
-function KV.starts_with(str, prefix)
-    return str:sub(1, #prefix) == prefix
-end
+    function KV:del(keyString)
+        self.store[keyString] = nil
+    end
 
-function KV:getPrefix(str)
-    return KV.filter_store(self.store, function(k, _)
-        return KV.starts_with(k, str)
-    end)
-end
+    function KV:keys()
+        local keys = {}
+        for k, _ in pairs(self.store) do
+            table.insert(keys, k)
+        end
+        return keys
+    end
 
-package.loaded[KVPackageName] = KV
+    function KV:registerPlugin(pluginName, pluginFunction)
+        if type(pluginName) ~= "string" or type(pluginFunction) ~= "function" then
+            error("Invalid plugin name or function")
+        end
+        if self[pluginName] then
+            error(pluginName .. " already exists")
+        end
 
-return KV
+        self[pluginName] = pluginFunction
+    end
+
+    function KV.filter_store(store, fn)
+        local results = {}
+        for k, v in pairs(store) do
+            if fn(k, v) then
+                results[k] = v
+            end
+        end
+        return results
+    end
+
+    function KV.starts_with(str, prefix)
+        return str:sub(1, #prefix) == prefix
+    end
+
+    function KV:getPrefix(str)
+        return KV.filter_store(self.store, function(k, _)
+            return KV.starts_with(k, str)
+        end)
+    end
+
+    package.loaded[KVPackageName] = KV
+
+    return KV
 end
 package.loaded['@permaweb/kv-base'] = load_kv()
 
@@ -555,51 +552,52 @@ package.loaded['@permaweb/kv-base'] = load_kv()
 -- ================================================================================
 -- ================================================================================
 local function load_batch()
-local BatchPlugin = {}
-local PackageName = "@permaweb/kv-batch"
-function BatchPlugin.new()
-    local plugin = {}
+    local BatchPlugin = {}
+    local PackageName = "@permaweb/kv-batch"
+    function BatchPlugin.new()
+        local plugin = {}
 
-    -- Register the plugin methods to a KV instance
-    function plugin.register(kv)
-        kv:registerPlugin("batchInit", function()
-            return plugin.createBatch(kv)
-        end)
-    end
-
-    function plugin.createBatch(kv)
-        local batch = {}
-        batch.operations = {}
-
-        function batch:set(keyString, value)
-            table.insert(self.operations, { op = "set", key = keyString, value = value })
+        -- Register the plugin methods to a KV instance
+        function plugin.register(kv)
+            kv:registerPlugin("batchInit", function()
+                return plugin.createBatch(kv)
+            end)
         end
-        -- TODO probably implement del?
 
-        -- Execute all batched operations
-        function batch:execute()
-            for _, operation in ipairs(self.operations) do
-                if operation.op == "set" then
-                    kv:set(operation.key, operation.value)
-                end
+        function plugin.createBatch(kv)
+            local batch = {}
+            batch.operations = {}
+
+            function batch:set(keyString, value)
+                table.insert(self.operations, { op = "set", key = keyString, value = value })
             end
-            self:clear()  -- Optionally clear the batch after execution
+
+            -- TODO probably implement del?
+
+            -- Execute all batched operations
+            function batch:execute()
+                for _, operation in ipairs(self.operations) do
+                    if operation.op == "set" then
+                        kv:set(operation.key, operation.value)
+                    end
+                end
+                self:clear() -- Optionally clear the batch after execution
+            end
+
+            -- Clear all batched operations
+            function batch:clear()
+                self.operations = {}
+            end
+
+            return batch
         end
 
-        -- Clear all batched operations
-        function batch:clear()
-            self.operations = {}
-        end
-
-        return batch
+        return plugin
     end
 
-    return plugin
-end
+    package.loaded[PackageName] = BatchPlugin
 
-package.loaded[PackageName] = BatchPlugin
-
-return BatchPlugin
+    return BatchPlugin
 end
 package.loaded['@permaweb/kv-batch'] = load_batch()
 
@@ -611,25 +609,25 @@ package.loaded['@permaweb/kv-batch'] = load_batch()
 -- ================================================================================
 -- ================================================================================
 local function load_asset_manager()
-local AssetManager = {}
+    local AssetManager = {}
 
-AssetManager.__index = AssetManager
+    AssetManager.__index = AssetManager
 
-local AssetManagerPackageName = '@permaweb/asset-manager'
+    local AssetManagerPackageName = '@permaweb/asset-manager'
 
-function AssetManager.new()
-    local self = setmetatable({}, AssetManager)
-    self.uploads = {}
-    return self
-end
+    function AssetManager.new()
+        local self = setmetatable({}, AssetManager)
+        self.uploads = {}
+        return self
+    end
 
-function AssetManager.get_uploads()
-    print('Get uploads')
-end
+    function AssetManager.get_uploads()
+        print('Get uploads')
+    end
 
-package.loaded[AssetManagerPackageName] = AssetManager
+    package.loaded[AssetManagerPackageName] = AssetManager
 
-return AssetManager
+    return AssetManager
 end
 package.loaded['@permaweb/asset-manager'] = load_asset_manager()
 
@@ -641,174 +639,163 @@ package.loaded['@permaweb/asset-manager'] = load_asset_manager()
 -- ================================================================================
 -- ================================================================================
 local function load_zone()
-local PackageName = "@permaweb/zone"
-local KV = require("@permaweb/kv-base")
-if not KV then
-    error("KV Not found, install it")
-end
-
-local BatchPlugin = require("@permaweb/kv-batch")
-if not BatchPlugin then
-    error("BatchPlugin not found, install it")
-end
-
-local AssetManager = require("@permaweb/asset-manager")
-if not AssetManager then
-    error("AssetManager not found, install it")
-end
-
-if package.loaded[PackageName] then
-    return package.loaded[PackageName]
-end
-
-if not Zone then Zone = {} end
-if not Zone.zoneKV then Zone.zoneKV = KV.new({BatchPlugin}) end
-
--- handlers
-Zone.ZONE_M_SET = "Zone-Metadata.Set"
-Zone.ZONE_M_GET = "Zone-Metadata.Get"
-Zone.ZONE_M_ERROR = "Zone-Metadata.Error"
-Zone.ZONE_M_SUCCESS = "Zone-Metadata.Success"
-Zone.ZONE_INFO = "Zone-Info"
-
-function Zone.decodeMessageData(data)
-    local status, decodedData = pcall(json.decode, data)
-    if not status or type(decodedData) ~= 'table' then
-        return false, nil
+    local PackageName = "@permaweb/zone"
+    local KV = require("@permaweb/kv-base")
+    if not KV then
+        error("KV Not found, install it")
     end
 
-    return true, decodedData
-end
-
-function Zone.isAuthorized(msg)
-    if msg.From == Owner then
-        return true
-    end
-    return false
-end
-
-function Zone.hello()
-    print("Hello zone")
-end
-
-function Zone.zoneSet(msg)
-
-    if Zone.isAuthorized(msg) ~= true then
-        ao.send({
-            Target = msg.From,
-            Action = Zone.ZONE_M_ERROR,
-            Tags = {
-                Status = 'Error',
-                Message =
-                'Not Authorized'
-            }
-        })
-        return
-    end
-    local decodeCheck, data = Zone.decodeMessageData(msg.Data)
-    if not decodeCheck then
-        ao.send({
-            Target = msg.From,
-            Action = Zone.ZONE_M_ERROR,
-            Tags = {
-                Status = 'Error',
-                Message =
-                'Invalid Data'
-            }
-        })
-        return
+    local BatchPlugin = require("@permaweb/kv-batch")
+    if not BatchPlugin then
+        error("BatchPlugin not found, install it")
     end
 
-    local entries = data.entries
+    local AssetManager = require("@permaweb/asset-manager")
+    if not AssetManager then
+        error("AssetManager not found, install it")
+    end
 
-    local testkeys = {}
+    if package.loaded[PackageName] then
+        return package.loaded[PackageName]
+    end
 
-    if #entries then
-        for _, entry in ipairs(entries) do
-            if entry.key and entry.value then
-                table.insert(testkeys, entry.key)
-                Zone.zoneKV:set(entry.key, entry.value)
+    if not Zone then Zone = {} end
+    if not Zone.zoneKV then Zone.zoneKV = KV.new({ BatchPlugin }) end
+
+    -- handlers
+    Zone.ZONE_M_SET = "Zone-Metadata.Set"
+    Zone.ZONE_M_GET = "Zone-Metadata.Get"
+    Zone.ZONE_M_ERROR = "Zone-Metadata.Error"
+    Zone.ZONE_M_SUCCESS = "Zone-Metadata.Success"
+    Zone.ZONE_INFO = "Zone-Info"
+
+    function Zone.decodeMessageData(data)
+        local status, decodedData = pcall(json.decode, data)
+        if not status or type(decodedData) ~= 'table' then
+            return false, nil
+        end
+
+        return true, decodedData
+    end
+
+    function Zone.isAuthorized(msg)
+        if msg.From == Owner then
+            return true
+        end
+        return false
+    end
+
+    function Zone.hello()
+        print("Hello zone")
+    end
+
+    function Zone.zoneSet(msg)
+        if Zone.isAuthorized(msg) ~= true then
+            ao.send({
+                Target = msg.From,
+                Action = Zone.ZONE_M_ERROR,
+                Tags = {
+                    Status = 'Error',
+                    Message =
+                    'Not Authorized'
+                }
+            })
+            return
+        end
+        local decodeCheck, data = Zone.decodeMessageData(msg.Data)
+        if not decodeCheck then
+            ao.send({
+                Target = msg.From,
+                Action = Zone.ZONE_M_ERROR,
+                Tags = {
+                    Status = 'Error',
+                    Message =
+                    'Invalid Data'
+                }
+            })
+            return
+        end
+
+        local entries = data.entries
+
+        local testkeys = {}
+
+        if #entries then
+            for _, entry in ipairs(entries) do
+                if entry.key and entry.value then
+                    table.insert(testkeys, entry.key)
+                    Zone.zoneKV:set(entry.key, entry.value)
+                end
             end
+            ao.send({
+                Target = msg.From,
+                Action = Zone.ZONE_M_SUCCESS,
+                Tags = {
+                    Value1 = Zone.zoneKV:get(testkeys[1]),
+                    Key1 = testkeys[1]
+                },
+                Data = json.encode({ First = Zone.zoneKV:get(testkeys[1]) })
+            })
+            return
         end
-        ao.send({
-            Target = msg.From,
-            Action = Zone.ZONE_M_SUCCESS,
-            Tags =  {
-                Value1 = Zone.zoneKV:get(testkeys[1]),
-                Key1 = testkeys[1]
-            },
-            Data = json.encode({ First = Zone.zoneKV:get(testkeys[1]) })
-        })
-        return
-    end
-end
-
-function Zone.zoneGet(msg)
-
-    local decodeCheck, data = Zone.decodeMessageData(msg.Data)
-    if not decodeCheck then
-        ao.send({
-            Target = msg.From,
-            Action = Zone.ZONE_M_ERROR,
-            Tags = {
-                Status = 'Error',
-                Message =
-                'Invalid Data'
-            }
-        })
-        return
     end
 
-    local keys = data.keys
-
-    if not keys then
-        error("no keys")
-    end
-
-    if keys then
-        local results = {}
-        for _, k in ipairs(keys) do
-            results[k] = Zone.zoneKV:get(k)
+    function Zone.zoneGet(msg)
+        local decodeCheck, data = Zone.decodeMessageData(msg.Data)
+        if not decodeCheck then
+            ao.send({
+                Target = msg.From,
+                Action = Zone.ZONE_M_ERROR,
+                Tags = {
+                    Status = 'Error',
+                    Message =
+                    'Invalid Data'
+                }
+            })
+            return
         end
-        ao.send({
-            Target = msg.From,
-            Action = Zone.ZONE_M_SUCCESS,
-            Data = json.encode({Results = results} )
-        })
-    end
-end
 
---Handlers.remove(Zone.ZONE_M_SET)
-Handlers.add(
+        local keys = data.keys
+
+        if not keys then
+            error("no keys")
+        end
+
+        if keys then
+            local results = {}
+            for _, k in ipairs(keys) do
+                results[k] = Zone.zoneKV:get(k)
+            end
+            ao.send({
+                Target = msg.From,
+                Action = Zone.ZONE_M_SUCCESS,
+                Data = json.encode({ Results = results })
+            })
+        end
+    end
+
+    --Handlers.remove(Zone.ZONE_M_SET)
+    Handlers.add(
         Zone.ZONE_M_SET,
         Handlers.utils.hasMatchingTag("Action", Zone.ZONE_M_SET),
         Zone.zoneSet
-)
---Handlers.remove(Zone.ZONE_M_GET)
-Handlers.add(
+    )
+    --Handlers.remove(Zone.ZONE_M_GET)
+    Handlers.add(
         Zone.ZONE_M_GET,
         Handlers.utils.hasMatchingTag("Action", Zone.ZONE_M_GET),
         Zone.zoneGet
-)
+    )
 
-Handlers.add(
-    "Zone-Uploads",
-    Handlers.utils.hasMatchingTag("Action", "Zone-Uploads"),
-    function (msg)
-        print("Zone-Uploads")
-        -- AssetManager.get_uploads()
-    end
-)
+    Handlers.add(
+        "Zone-Uploads",
+        Handlers.utils.hasMatchingTag("Action", "Zone-Uploads"),
+        function(msg)
+            print("Zone-Uploads123")
+            -- AssetManager.get_uploads()
+        end
+    )
 
-return Zone
-
--- Add asset manager path to bundle.sh FILES and FILE_MAP
--- Require asset-manager in zone.lua
--- Create a handler in zone.lua Zone.getAssets
--- In that handler run AssetManager.get_uploads
--- Run ./bundle.sh
--- Create a process
--- .load path/to/bundle.lua
+    return Zone
 end
 package.loaded['@permaweb/zone'] = load_zone()
-
