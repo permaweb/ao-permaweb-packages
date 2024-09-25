@@ -11,8 +11,8 @@ FILES=(
     "./trusted.lua"
     "../kv/base/src/kv.lua"
     "../kv/batchplugin/src/batch.lua"
-    "../zone/src/zone.lua"
     "../asset-manager/base/src/asset-manager.lua"
+    "../zone/src/zone.lua"
 )
 
 declare -A FILE_MAP=(

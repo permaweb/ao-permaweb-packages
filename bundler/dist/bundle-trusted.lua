@@ -607,6 +607,36 @@ package.loaded['@permaweb/kv-batch'] = load_batch()
 
 -- ================================================================================
 -- ================================================================================
+-- @permaweb/asset-manager
+-- ================================================================================
+-- ================================================================================
+local function load_asset_manager()
+local AssetManager = {}
+
+AssetManager.__index = AssetManager
+
+local AssetManagerPackageName = '@permaweb/asset-manager'
+
+function AssetManager.new()
+    local self = setmetatable({}, AssetManager)
+    self.uploads = {}
+    return self
+end
+
+function AssetManager.get_uploads()
+    print('Get uploads')
+end
+
+package.loaded[AssetManagerPackageName] = AssetManager
+
+return AssetManager
+end
+package.loaded['@permaweb/asset-manager'] = load_asset_manager()
+
+
+
+-- ================================================================================
+-- ================================================================================
 -- @permaweb/zone
 -- ================================================================================
 -- ================================================================================
@@ -781,34 +811,4 @@ return Zone
 -- .load path/to/bundle.lua
 end
 package.loaded['@permaweb/zone'] = load_zone()
-
-
-
--- ================================================================================
--- ================================================================================
--- @permaweb/asset-manager
--- ================================================================================
--- ================================================================================
-local function load_asset_manager()
-local AssetManager = {}
-
-AssetManager.__index = AssetManager
-
-local AssetManagerPackageName = '@permaweb/asset-manager'
-
-function AssetManager.new()
-    local self = setmetatable({}, AssetManager)
-    self.uploads = {}
-    return self
-end
-
-function AssetManager.get_uploads()
-    print('Get uploads')
-end
-
-package.loaded[AssetManagerPackageName] = AssetManager
-
-return AssetManager
-end
-package.loaded['@permaweb/asset-manager'] = load_asset_manager()
 
