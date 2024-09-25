@@ -12,11 +12,13 @@ FILES=(
     "../kv/base/src/kv.lua"
     "../kv/batchplugin/src/batch.lua"
     "../zone/src/zone.lua"
+    "../asset-manager/base/src/asset-manager.lua"
 )
 
 declare -A FILE_MAP=(
     ["../kv/base/src/kv.lua"]="@permaweb/kv-base"
     ["../kv/batchplugin/src/batch.lua"]="@permaweb/kv-batch"
+    ["../asset-manager/base/src/asset-manager.lua"]="@permaweb/asset-manager"
     ["../zone/src/zone.lua"]="@permaweb/zone"
 )
 
@@ -48,6 +50,7 @@ for FILE in "${FILES[@]}"; do
 
         echo "local function $FUNCTION_NAME()" >> "$TARGET_FILE"
         cat "$FILE" >> "$TARGET_FILE"
+        echo ""
         echo "end" >> "$TARGET_FILE"
         echo "package.loaded['$PACKAGE_NAME'] = $FUNCTION_NAME()" >> $TARGET_FILE
         echo "" >> "$TARGET_FILE"  # Add a newline for separation
