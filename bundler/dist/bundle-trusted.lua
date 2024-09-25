@@ -778,7 +778,8 @@ return Zone
 -- In that handler run AssetManager.get_uploads
 -- Run ./bundle.sh
 -- Create a process
--- .load path/to/bundle.luaend
+-- .load path/to/bundle.lua
+end
 package.loaded['@permaweb/zone'] = load_zone()
 
 
@@ -807,6 +808,7 @@ end
 
 package.loaded[AssetManagerPackageName] = AssetManager
 
-return AssetManagerend
+return AssetManager
+end
 package.loaded['@permaweb/asset-manager'] = load_asset_manager()
 
