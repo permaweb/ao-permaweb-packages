@@ -9,6 +9,11 @@ if not BatchPlugin then
     error("BatchPlugin not found, install it")
 end
 
+local AssetManager = require("@permaweb/asset-manager")
+if not AssetManager then
+    error("AssetManager not found, install it")
+end
+
 if package.loaded[PackageName] then
     return package.loaded[PackageName]
 end
@@ -143,5 +148,21 @@ Handlers.add(
         Zone.zoneGet
 )
 
+Handlers.add(
+    "Zone-Uploads",
+    Handlers.utils.hasMatchingTag("Action", "Zone-Uploads"),
+    function (msg)
+        print("Zone-Uploads")
+        -- AssetManager.get_uploads()
+    end
+)
+
 return Zone
 
+-- Add asset manager path to bundle.sh FILES and FILE_MAP
+-- Require asset-manager in zone.lua
+-- Create a handler in zone.lua Zone.getAssets
+-- In that handler run AssetManager.get_uploads
+-- Run ./bundle.sh
+-- Create a process
+-- .load path/to/bundle.lua
